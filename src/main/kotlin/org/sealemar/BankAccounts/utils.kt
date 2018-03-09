@@ -28,6 +28,8 @@ class ConcurrentLatch : Closeable {
     }
 }
 
+class RetriesExhaustedException : RuntimeException()
+
 /**
  * Repeats 'action' up to 'times' times.
  * @param times if 0 - repeats forever until the condition is met
@@ -44,6 +46,21 @@ fun <T : Any> repeatIf(times : Int = 0, action : () -> T, predicate : (T) -> Boo
         repeat(times) {
             action().takeUnless { predicate(it) }?.let { return it }
         }
+    }
+    return null
+}
+
+/**
+ * Repeats 'action' until the condition in 'predicate' is met or the 'timeout' has been expired
+ * @param timeout in milliseconds
+ * @param action action to repeat
+ * @param predicate condition upon which to repeat. If condition is not met, the cycle breaks
+ * @return the result of the successful 'action' or null upon timeout
+ */
+fun <T : Any?> repeatWithTimeout(timeout : Long, action: () -> T, predicate: (T) -> Boolean) : T? {
+    val start = System.currentTimeMillis()
+    while(System.currentTimeMillis() < start + timeout) {
+        action().takeUnless { predicate(it) }?.let { return it }
     }
     return null
 }

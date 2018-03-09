@@ -121,8 +121,6 @@ open class BankAccountWithFuturePayments(
     }
 }
 
-class RetriesExhaustedException : RuntimeException()
-
 /**
  * Balance can go below zero
  */
